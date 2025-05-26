@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SurveyMap Directional Markers</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    #map { 
+      height: 100vh; 
+      position: relative;
+    }
+    
+    .arrow {
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 16px solid #ff4444;
+    }
+    
+    .popup-content {
+      max-width: 250px;
+    }
+    
+    .popup-content img {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      border-radius: 8px;
+      margin: 8px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .popup-title {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    
+    .popup-description {
+      color: #666;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    
+    .heading-badge {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 5px;
+    }
+    
+    .info-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 300px;
+    }
+    
+    .info-title {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 5px;
+    }
+    
+    .info-item {
+      margin: 5px 0;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .direction-line {
+      stroke: #ff6b6b;
+      stroke-width: 2;
+      stroke-dasharray: 5,5;
+      opacity: 0.7;
+    }
+    
+    @media (max-width: 768px) {
+      .info-panel {
+        position: relative;
+        margin: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<div class="info-panel">
+  <div class="info-title">Survey Information</div>
+  <div class="info-item"><strong>AOI:</strong> AOI_001_Kolkata</div>
+  <div class="info-item"><strong>Surveyor:</strong> Srijit Mondal</div>
+  <div class="info-item"><strong>Synced:</strong> May 26, 2025</div>
+  <div class="info-item"><strong>Markers:</strong> <span id="marker-count">0</span></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const surveyData = {
+    "aoiId": "AOI_001_Kolkata", 
+    "surveyorId": "srijit",
+    "syncedAt": "2025-05-26T15:23:00Z",
+    "markers": [
+      {
+        "markerId": "AOI_001_srijit_20250526_001", 
+        "timestamp": "2025-05-26T12:00:00Z",
+        "location": {
+          "latitude": 22.4804,
+          "longitude": 88.3767
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/CxdKwkPw/IMG-20250407-124332494.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:00:00Z"
+          },
+          "deviceInfo": {
+            "model": "Pixel 6",
+            "manufacturer": "Google"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/Z5g5nn2p/IMG-20250407-124355420.jpg",
+            "heading": 59,
+            "metadata": {
+              "timestamp": "2025-05-26T12:05:00Z"
+            },
+            "deviceInfo": {
+              "model": "Pixel 6",
+              "manufacturer": "Google"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/Pqwrwhnc/IMG-20250407-124420826.jpg",
+            "heading": 135,
+            "metadata": {
+              "timestamp": "2025-05-26T12:06:00Z"
+            },
+            "deviceInfo": {
+              "model": "Pixel 6",
+              "manufacturer": "Google"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/9MPmLpMY/IMG-20250407-124518461.jpg",
+            "heading": 225,
+            "metadata": {
+              "timestamp": "2025-05-26T12:07:00Z"
+            },
+            "deviceInfo": {
+              "model": "Pixel 6",
+              "manufacturer": "Google"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      },
+      {
+        "markerId": "AOI_001_srijit_20250526_002", 
+        "timestamp": "2025-05-26T12:10:00Z",
+        "location": {
+          "latitude": 22.4808,
+          "longitude": 88.3772
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/rs883rRX/IMG-20250407-124601169.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:10:00Z"
+          },
+          "deviceInfo": {
+            "model": "iPhone 13",
+            "manufacturer": "Apple"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/kGfnmgWV/IMG-20250407-124638276.jpg",
+            "heading": 45,
+            "metadata": {
+              "timestamp": "2025-05-26T12:12:00Z"
+            },
+            "deviceInfo": {
+              "model": "iPhone 13",
+              "manufacturer": "Apple"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/xjRjHtB0/IMG-20250407-124645562.jpg",
+            "heading": 180,
+            "metadata": {
+              "timestamp": "2025-05-26T12:13:00Z"
+            },
+            "deviceInfo": {
+              "model": "iPhone 13",
+              "manufacturer": "Apple"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      },
+      {
+        "markerId": "AOI_001_srijit_20250526_003", 
+        "timestamp": "2025-05-26T12:20:00Z",
+        "location": {
+          "latitude": 22.4815,
+          "longitude": 88.3775
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/MK3W3XWN/IMG-20250407-124701617.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:20:00Z"
+          },
+          "deviceInfo": {
+            "model": "Galaxy S22",
+            "manufacturer": "Samsung"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/FH2hmqkx/IMG-20250407-124739186.jpg",
+            "heading": 10,
+            "metadata": {
+              "timestamp": "2025-05-26T12:22:00Z"
+            },
+            "deviceInfo": {
+              "model": "Galaxy S22",
+              "manufacturer": "Samsung"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/50J1QC3Y/IMG-20250407-124800790.jpg",
+            "heading": 120,
+            "metadata": {
+              "timestamp": "2025-05-26T12:23:00Z"
+            },
+            "deviceInfo": {
+              "model": "Galaxy S22",
+              "manufacturer": "Samsung"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/GthCqn6b/IMG-20250407-124837305.jpg",
+            "heading": 270,
+            "metadata": {
+              "timestamp": "2025-05-26T12:24:00Z"
+            },
+            "deviceInfo": {
+              "model": "Galaxy S22",
+              "manufacturer": "Samsung"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      },
+      {
+        "markerId": "AOI_001_srijit_20250526_004", 
+        "timestamp": "2025-05-26T12:30:00Z",
+        "location": {
+          "latitude": 22.4820,
+          "longitude": 88.3780
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/nrRtWwtB/IMG-20250407-124943142.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:30:00Z"
+          },
+          "deviceInfo": {
+            "model": "OnePlus 11",
+            "manufacturer": "OnePlus"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/CxdKwkPw/IMG-20250407-124332494.jpg",
+            "heading": 75,
+            "metadata": {
+              "timestamp": "2025-05-26T12:32:00Z"
+            },
+            "deviceInfo": {
+              "model": "OnePlus 11",
+              "manufacturer": "OnePlus"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/Z5g5nn2p/IMG-20250407-124355420.jpg",
+            "heading": 195,
+            "metadata": {
+              "timestamp": "2025-05-26T12:33:00Z"
+            },
+            "deviceInfo": {
+              "model": "OnePlus 11",
+              "manufacturer": "OnePlus"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      },
+      {
+        "markerId": "AOI_001_srijit_20250526_005", 
+        "timestamp": "2025-05-26T12:35:00Z",
+        "location": {
+          "latitude": 22.4818,
+          "longitude": 88.3785
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/Pqwrwhnc/IMG-20250407-124420826.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:35:00Z"
+          },
+          "deviceInfo": {
+            "model": "Xiaomi 13",
+            "manufacturer": "Xiaomi"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/9MPmLpMY/IMG-20250407-124518461.jpg",
+            "heading": 30,
+            "metadata": {
+              "timestamp": "2025-05-26T12:37:00Z"
+            },
+            "deviceInfo": {
+              "model": "Xiaomi 13",
+              "manufacturer": "Xiaomi"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/rs883rRX/IMG-20250407-124601169.jpg",
+            "heading": 90,
+            "metadata": {
+              "timestamp": "2025-05-26T12:38:00Z"
+            },
+            "deviceInfo": {
+              "model": "Xiaomi 13",
+              "manufacturer": "Xiaomi"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/kGfnmgWV/IMG-20250407-124638276.jpg",
+            "heading": 160,
+            "metadata": {
+              "timestamp": "2025-05-26T12:39:00Z"
+            },
+            "deviceInfo": {
+              "model": "Xiaomi 13",
+              "manufacturer": "Xiaomi"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/xjRjHtB0/IMG-20250407-124645562.jpg",
+            "heading": 270,
+            "metadata": {
+              "timestamp": "2025-05-26T12:40:00Z"
+            },
+            "deviceInfo": {
+              "model": "Xiaomi 13",
+              "manufacturer": "Xiaomi"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      },
+      {
+        "markerId": "AOI_001_srijit_20250526_006", 
+        "timestamp": "2025-05-26T12:45:00Z",
+        "location": {
+          "latitude": 22.4810,
+          "longitude": 88.3790
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/MK3W3XWN/IMG-20250407-124701617.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:45:00Z"
+          },
+          "deviceInfo": {
+            "model": "Pixel 7",
+            "manufacturer": "Google"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/FH2hmqkx/IMG-20250407-124739186.jpg",
+            "heading": 105,
+            "metadata": {
+              "timestamp": "2025-05-26T12:47:00Z"
+            },
+            "deviceInfo": {
+              "model": "Pixel 7",
+              "manufacturer": "Google"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/50J1QC3Y/IMG-20250407-124800790.jpg",
+            "heading": 285,
+            "metadata": {
+              "timestamp": "2025-05-26T12:48:00Z"
+            },
+            "deviceInfo": {
+              "model": "Pixel 7",
+              "manufacturer": "Google"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      },
+      {
+        "markerId": "AOI_001_srijit_20250526_007",
+        "timestamp": "2025-05-26T12:50:00Z",
+        "location": {
+          "latitude": 22.4805,
+          "longitude": 88.3795
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/GthCqn6b/IMG-20250407-124837305.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:50:00Z"
+          },
+          "deviceInfo": {
+            "model": "iPhone 14",
+            "manufacturer": "Apple"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/nrRtWwtB/IMG-20250407-124943142.jpg",
+            "heading": 0,
+            "metadata": {
+              "timestamp": "2025-05-26T12:52:00Z"
+            },
+            "deviceInfo": {
+              "model": "iPhone 14",
+              "manufacturer": "Apple"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/CxdKwkPw/IMG-20250407-124332494.jpg",
+            "heading": 110,
+            "metadata": {
+              "timestamp": "2025-05-26T12:53:00Z"
+            },
+            "deviceInfo": {
+              "model": "iPhone 14",
+              "manufacturer": "Apple"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/Z5g5nn2p/IMG-20250407-124355420.jpg",
+            "heading": 250,
+            "metadata": {
+              "timestamp": "2025-05-26T12:54:00Z"
+            },
+            "deviceInfo": {
+              "model": "iPhone 14",
+              "manufacturer": "Apple"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      },
+      {
+        "markerId": "AOI_001_srijit_20250526_008",
+        "timestamp": "2025-05-26T12:58:00Z",
+        "location": {
+          "latitude": 22.4800,
+          "longitude": 88.3788
+        },
+        "centerPole": {
+          "url": "https://i.postimg.cc/Pqwrwhnc/IMG-20250407-124420826.jpg",
+          "metadata": {
+            "timestamp": "2025-05-26T12:58:00Z"
+          },
+          "deviceInfo": {
+            "model": "Galaxy S23",
+            "manufacturer": "Samsung"
+          },
+          "imageProperties": {
+            "width": 4032,
+            "height": 3024,
+            "format": "jpeg"
+          }
+        },
+        "branchImages": [
+          {
+            "url": "https://i.postimg.cc/9MPmLpMY/IMG-20250407-124518461.jpg",
+            "heading": 65,
+            "metadata": {
+              "timestamp": "2025-05-26T13:00:00Z"
+            },
+            "deviceInfo": {
+              "model": "Galaxy S23",
+              "manufacturer": "Samsung"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/rs883rRX/IMG-20250407-124601169.jpg",
+            "heading": 155,
+            "metadata": {
+              "timestamp": "2025-05-26T13:01:00Z"
+            },
+            "deviceInfo": {
+              "model": "Galaxy S23",
+              "manufacturer": "Samsung"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/kGfnmgWV/IMG-20250407-124638276.jpg",
+            "heading": 245,
+            "metadata": {
+              "timestamp": "2025-05-26T13:02:00Z"
+            },
+            "deviceInfo": {
+              "model": "Galaxy S23",
+              "manufacturer": "Samsung"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          },
+          {
+            "url": "https://i.postimg.cc/xjRjHtB0/IMG-20250407-124645562.jpg",
+            "heading": 315,
+            "metadata": {
+              "timestamp": "2025-05-26T13:03:00Z"
+            },
+            "deviceInfo": {
+              "model": "Galaxy S23",
+              "manufacturer": "Samsung"
+            },
+            "imageProperties": {
+              "width": 4032,
+              "height": 3024,
+              "format": "jpeg"
+            }
+          }
+        ]
+      }
+    ]
+  };
+
+  // Initialize map
+  const map = L.map('map').setView([18.5204, 73.8567], 18);
+  
+  // Add satellite imagery
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    maxZoom: 20
+  }).addTo(map);
+
+  // Utility function to calculate destination coordinates
+  function getDestinationLatLng(lat, lng, angle, distanceMeters) {
+    const R = 6378137; // Earth's radius in meters
+    const δ = distanceMeters / R;
+    const θ = angle * Math.PI / 180;
+
+    const φ1 = lat * Math.PI / 180;
+    const λ1 = lng * Math.PI / 180;
+
+    const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
+    const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
+
+    return {
+      lat: φ2 * 180 / Math.PI,
+      lng: λ2 * 180 / Math.PI
+    };
+  }
+
+  // Format timestamp for display
+  function formatTimestamp(timestamp) {
+    return new Date(timestamp).toLocaleString();
+  }
+
+  // Process markers
+  let totalBranchImages = 0;
+  
+  surveyData.markers.forEach((marker, index) => {
+    const { latitude, longitude } = marker.location;
+
+    // Center marker popup content
+    const markerPopup = `
+      <div class="popup-content">
+        <div class="popup-title">${marker.markerId}</div>
+        <img src="${marker.centerPole.url}" alt="Center pole image">
+        <div style="font-size: 11px; color: #888;">
+          📱 ${marker.centerPole.deviceInfo.manufacturer} ${marker.centerPole.deviceInfo.model}<br>
+          🕐 ${formatTimestamp(marker.timestamp)}
+        </div>
+      </div>
+    `;
+
+    // Add center marker with default marker
+    L.marker([latitude, longitude])
+      .addTo(map)
+      .bindPopup(markerPopup);
+
+    // Track unique headings to avoid duplicate arrows
+    const uniqueHeadings = new Set();
+
+    marker.branchImages.forEach(branch => {
+      // Skip if we've already processed this heading
+      if (uniqueHeadings.has(branch.heading)) return;
+      uniqueHeadings.add(branch.heading);
+      totalBranchImages++;
+
+      // Calculate arrow position (20 meters from center)
+      const arrowDistance = 60;
+      const endPoint = getDestinationLatLng(latitude, longitude, branch.heading, arrowDistance);
+
+      // Add line from center to arrow
+      L.polyline([[latitude, longitude], [endPoint.lat, endPoint.lng]], {
+        color: '#ff4444',
+        weight: 2,
+        opacity: 0.8
+      }).addTo(map);
+
+      // Create simple arrow icon
+      const arrowIcon = L.divIcon({
+        className: 'arrow',
+        iconSize: [16, 16],
+        // iconAnchor: [8, 8],
+        popupAnchor: [0, -8],
+        html: `<div style="transform: rotate(${branch.heading}deg);" class="arrow"></div>`
+      });
+
+      // Arrow popup content
+      const arrowPopup = `
+        <div class="popup-content">
+          <div class="popup-title">Branch Image</div>
+          <img src="${branch.url}" alt="Branch image">
+          <div class="heading-badge">Heading: ${branch.heading}°</div>
+          <div style="font-size: 11px; color: #888; margin-top: 8px;">
+            📱 ${branch.deviceInfo.manufacturer} ${branch.deviceInfo.model}<br>
+            🕐 ${formatTimestamp(branch.metadata.timestamp)}
+          </div>
+        </div>
+      `;
+
+      // Add arrow marker
+      L.marker([endPoint.lat, endPoint.lng], { icon: arrowIcon })
+        .addTo(map)
+        .bindPopup(arrowPopup);
+    });
+  });
+
+  // Update marker count in info panel
+  document.getElementById('marker-count').textContent = `${surveyData.markers.length} (${totalBranchImages} directions)`;
+
+  // Add map click handler for coordinates
+  map.on('click', function(e) {
+    console.log(`Clicked at: ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`);
+  });
+
+  // Fit map to show all markers
+  const group = new L.featureGroup();
+  surveyData.markers.forEach(marker => {
+    group.addLayer(L.marker([marker.location.latitude, marker.location.longitude]));
+  });
+  
+  if (surveyData.markers.length > 1) {
+    map.fitBounds(group.getBounds().pad(0.1));
+  }
+</script>
+</body>
+</html>
